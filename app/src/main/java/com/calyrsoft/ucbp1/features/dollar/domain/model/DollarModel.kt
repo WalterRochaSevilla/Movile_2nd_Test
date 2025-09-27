@@ -1,6 +1,9 @@
 package com.calyrsoft.ucbp1.features.dollar.domain.model
 
 data class DollarModel(
-    var dollarOfficial: String? = null,
-    var dollarParallel: String? = null
+    var officialBuy: String? = null,
+    var officialSell: String? = null,
+    var parallelBuy: String? = null,
+    var parallelSell: String? = null,
+    var updateDate: String? = null
 )

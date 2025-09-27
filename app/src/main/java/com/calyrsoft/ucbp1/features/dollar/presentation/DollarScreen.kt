@@ -2,14 +2,17 @@ package com.calyrsoft.ucbp1.features.dollar.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.koin.androidx.compose.koinViewModel
+import java.util.Date
 
 @Composable
 fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
@@ -23,8 +26,35 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
             is DollarViewModel.DollarUIState.Error -> Text(stateValue.message)
             DollarViewModel.DollarUIState.Loading -> CircularProgressIndicator()
             is DollarViewModel.DollarUIState.Success -> {
-                Text(stateValue.data.dollarOfficial!!)
-                Text(stateValue.data.dollarParallel!!)
+                Text(
+                    text="Cambio del Dolar",
+                    style= MaterialTheme.typography.titleLarge
+                )
+                Row {
+                    Text("Compra: ")
+                    Text(stateValue.data.officialBuy.toString())
+                }
+                Row {
+                    Text("Venta: ")
+                    Text(stateValue.data.officialSell.toString())
+                }
+                Text(
+                    text="Cambio paralelo",
+                    style= MaterialTheme.typography.titleLarge
+                )
+                Row {
+                    Text("Compra: ")
+                    Text(stateValue.data.parallelBuy.toString())
+                }
+                Row {
+                    Text("Venta: ")
+                    Text(stateValue.data.parallelSell.toString())
+                }
+                Text(
+                    text="Ultima actualizacion: ",
+                    style= MaterialTheme.typography.titleLarge
+                )
+                Text(Date(stateValue.data.updateDate).toString())
             }
         }
     }
