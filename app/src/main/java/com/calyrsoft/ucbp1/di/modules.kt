@@ -15,17 +15,19 @@ import com.calyrsoft.ucbp1.features.github.domain.repository.IGithubRepository
 import com.calyrsoft.ucbp1.features.github.domain.usecase.FindByNickNameUseCase
 import com.calyrsoft.ucbp1.features.github.presentation.GithubViewModel
 import com.calyrsoft.ucbp1.features.movie.data.api.MovieService
+import com.calyrsoft.ucbp1.features.movie.data.database.MovieDatabase // NUEVO
+import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieLocalDataSource // NUEVO
 import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieRemoteDataSource
 import com.calyrsoft.ucbp1.features.movie.data.repository.MovieRepository
 import com.calyrsoft.ucbp1.features.movie.domain.repository.IMoviesRepository
 import com.calyrsoft.ucbp1.features.movie.domain.usecase.FetchPopularMoviesUseCase
+import com.calyrsoft.ucbp1.features.movie.domain.usecase.UpdateMovieLikeUseCase // NUEVO
 import com.calyrsoft.ucbp1.features.movie.presentation.PopularMoviesViewModel
 import com.calyrsoft.ucbp1.features.profile.application.ProfileViewModel
 import com.calyrsoft.ucbp1.features.profile.data.repository.ProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.repository.IProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.usecase.GetProfileUseCase
 import okhttp3.OkHttpClient
-import org.koin.android.BuildConfig
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -43,7 +45,6 @@ object NetworkConstants {
 }
 
 val appModule = module {
-
 
     // OkHttpClient
     single {
@@ -74,10 +75,10 @@ val appModule = module {
 
     // GithubService
     single<GithubService> {
-        get<Retrofit>( named(NetworkConstants.RETROFIT_GITHUB)).create(GithubService::class.java)
+        get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB)).create(GithubService::class.java)
     }
-    single{ GithubRemoteDataSource(get()) }
-    single<IGithubRepository>{ GithubRepository(get()) }
+    single { GithubRemoteDataSource(get()) }
+    single<IGithubRepository> { GithubRepository(get()) }
 
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
@@ -86,15 +87,16 @@ val appModule = module {
     factory { GetProfileUseCase(get()) }
     viewModel { ProfileViewModel(get()) }
 
+    // Dollar Feature
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
     single { DollarLocalDataSource(get()) }
     single<IDollarRepository> { DollarRepository(get(), get()) }
     factory { FetchDollarUseCase(get()) }
-    viewModel{ DollarViewModel(get()) }
+    viewModel { DollarViewModel(get()) }
 
-
+    // Movie Feature - COMPLETADO
     single(named("apiKey")) {
         androidApplication().getString(R.string.api_key)
     }
@@ -102,8 +104,32 @@ val appModule = module {
     single<MovieService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE)).create(MovieService::class.java)
     }
+
+    // Base de datos para películas
+    single { MovieDatabase.getDatabase(androidContext()) }
+    single { get<MovieDatabase>().movieDao() }
+
+    // DataSources
     single { MovieRemoteDataSource(get(), get(named("apiKey"))) }
-    single<IMoviesRepository> { MovieRepository(get()) }
+    single { MovieLocalDataSource(get()) }
+
+    // Repository
+    single<IMoviesRepository> {
+        MovieRepository(
+            movieRemoteDataSource = get(),
+            movieLocalDataSource = get()
+        )
+    }
+
+    // Use Cases
     factory { FetchPopularMoviesUseCase(get()) }
-    viewModel{ PopularMoviesViewModel(get()) }
+    factory { UpdateMovieLikeUseCase(get()) }
+
+    // ViewModel
+    viewModel {
+        PopularMoviesViewModel(
+            fetchPopularMovies = get(),
+            updateMovieLike = get()
+        )
+    }
 }

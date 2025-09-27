@@ -24,8 +24,11 @@ fun PopularMoviesScreen(
         is PopularMoviesViewModel.UiState.Loading ->
             CircularProgressIndicator()
         is PopularMoviesViewModel.UiState.Success ->
-            PopularMoviesView(movies = s.movies)
-
+            PopularMoviesView(
+                movies = s.movies,
+                onMovieLikeClicked = { movieId, isLiked ->
+                    popularMoviesViewModel.toggleMovieLike(movieId, isLiked)
+                }
+            )
     }
-
 }
