@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 class GetProfileUseCase(
     val repository: IProfileRepository
 ) {
-    suspend fun invoke(): Result<ProfileModel> {
+    suspend operator fun invoke(): Result<ProfileModel> {
         delay(3000)
         return repository.fetchData()
     }
